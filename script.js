@@ -14,20 +14,19 @@ const scale = ["D","E","F","G","A","Bb","C"];
 
 // ---------------- CONTROLS ----------------
 
-function getBPM() {
+function bpm() {
   return Number(document.getElementById("bpm")?.value || 90);
 }
 
-function getSwing() {
+function swing() {
   return Number(document.getElementById("swing")?.value || 0) / 100;
 }
 
-function density(arrName) {
-  const el = document.getElementById(arrName);
-  return el ? Number(el.value) / 100 : 0.5;
+function dens(id) {
+  return Number(document.getElementById(id)?.value || 100) / 100;
 }
 
-// ---------------- AUDIO ENGINE ----------------
+// ---------------- AUDIO CORE ----------------
 
 // KICK (punch)
 function playKick(t) {
@@ -35,7 +34,7 @@ function playKick(t) {
   const g = audioCtx.createGain();
 
   o.frequency.setValueAtTime(140, t);
-  o.frequency.exponentialRampToValueAtTime(50, t + 0.12);
+  o.frequency.exponentialRampToValueAtTime(55, t + 0.12);
 
   g.gain.setValueAtTime(1, t);
   g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
@@ -47,46 +46,25 @@ function playKick(t) {
   o.stop(t + 0.12);
 }
 
-// SNARE (punchy, not harsh noise)
+// SNARE (CLEAN + punch, inte brus)
 function playSnare(t) {
-  // noise body
-  const buffer = audioCtx.createBuffer(1, 44100, 44100);
-  const data = buffer.getChannelData(0);
-
-  for (let i = 0; i < data.length; i++) {
-    data[i] = (Math.random() * 2 - 1) * 0.6;
-  }
-
-  const noise = audioCtx.createBufferSource();
+  const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
 
-  noise.buffer = buffer;
-  g.gain.value = 0.25;
+  o.type = "triangle";
+  o.frequency.setValueAtTime(180, t);
 
-  noise.connect(g);
+  g.gain.setValueAtTime(0.25, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.10);
+
+  o.connect(g);
   g.connect(audioCtx.destination);
 
-  noise.start(t);
-  noise.stop(t + 0.12);
-
-  // body punch
-  const o = audioCtx.createOscillator();
-  const g2 = audioCtx.createGain();
-
-  o.type = "triangle";
-  o.frequency.setValueAtTime(200, t);
-
-  g2.gain.setValueAtTime(0.2, t);
-  g2.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-
-  o.connect(g2);
-  g2.connect(audioCtx.destination);
-
   o.start(t);
-  o.stop(t + 0.1);
+  o.stop(t + 0.10);
 }
 
-// HAT
+// HAT (tight noise)
 function playHat(t) {
   const buffer = audioCtx.createBuffer(1, 44100, 44100);
   const data = buffer.getChannelData(0);
@@ -95,21 +73,23 @@ function playHat(t) {
     data[i] = (Math.random() * 2 - 1) * 0.3;
   }
 
-  const noise = audioCtx.createBufferSource();
+  const src = audioCtx.createBufferSource();
   const g = audioCtx.createGain();
 
-  noise.buffer = buffer;
-  g.gain.value = 0.08;
+  src.buffer = buffer;
 
-  noise.connect(g);
+  g.gain.setValueAtTime(0.08, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+
+  src.connect(g);
   g.connect(audioCtx.destination);
 
-  noise.start(t);
-  noise.stop(t + 0.03);
+  src.start(t);
+  src.stop(t + 0.03);
 }
 
 // BASS
-function noteToFreq(n) {
+function noteFreq(n) {
   return {
     "D":73,"E":82,"F":87,"G":98,"A":110,"Bb":116,"C":130
   }[n] || 73;
@@ -119,7 +99,7 @@ function playBass(n, t) {
   const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
 
-  o.frequency.value = noteToFreq(n);
+  o.frequency.value = noteFreq(n);
 
   g.gain.setValueAtTime(0.25, t);
   g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
@@ -143,24 +123,26 @@ function start() {
 }
 
 function loop() {
-  const bpm = getBPM();
-  const swing = getSwing();
+  const bpm = bpm();
+  const sw = swing();
 
   const stepTime = (60 / bpm) / 4;
 
   const now = audioCtx.currentTime;
 
-  const isOff = step % 2 === 1;
-  const swingOffset = isOff ? stepTime * swing : 0;
+  const off = step % 2 === 1;
+  const swingOffset = off ? stepTime * sw : 0;
 
   const t = now + swingOffset;
 
-  // DENSITY CONTROL
-  if (kick[step] && Math.random() < density("kickDensity")) playKick(t);
-  if (snare[step] && Math.random() < density("snareDensity")) playSnare(t);
-  if (hat[step] && Math.random() < density("hatDensity")) playHat(t);
+  // DENSITY
+  if (kick[step] && Math.random() < dens("kickDensity")) playKick(t);
+  if (snare[step] && Math.random() < dens("snareDensity")) playSnare(t);
+  if (hat[step] && Math.random() < dens("hatDensity")) playHat(t);
 
-  if (bass[step]) playBass(bass[step], t);
+  if (bass[step] && Math.random() < dens("bassDensity")) {
+    playBass(bass[step], t);
+  }
 
   highlight();
 
@@ -201,6 +183,8 @@ function createGrid() {
 
   for (let i = 0; i < STEPS; i++) {
     const c = document.createElement("div");
+    c.style.display = "inline-block";
+    c.style.margin = "2px";
 
     const k = document.createElement("button");
     const s = document.createElement("button");
@@ -261,6 +245,7 @@ function highlight() {
   }
 }
 
-// INIT
+// ---------------- INIT ----------------
+
 createGrid();
 createBassGrid();
