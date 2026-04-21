@@ -34,21 +34,25 @@ function playKick(time) {
 
 // SNARE (noise + body)
 function playSnare(time) {
-  playNoise(time, 0.2, 0.3);
 
+  // NOISE (short + filtered feel)
+  playNoise(time, 0.12, 0.25);
+
+  // BODY (lägre ton, mindre "pip")
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
-  osc.frequency.value = 200;
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(180, time);
 
-  gain.gain.setValueAtTime(0.2, time);
-  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+  gain.gain.setValueAtTime(0.15, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start(time);
-  osc.stop(time + 0.1);
+  osc.stop(time + 0.12);
 }
 
 // HIHAT (kort noise)
