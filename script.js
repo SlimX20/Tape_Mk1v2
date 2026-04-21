@@ -10,6 +10,9 @@ const snare = Array(STEPS).fill(0);
 const hat = Array(STEPS).fill(0);
 const bass = Array(STEPS).fill(null);
 
+const scale = ["D","E","F","G","A","Bb","C"];
+
+// ---------------- VELOCITY ----------------
 const velocity = {
   kick: Array(STEPS).fill(0.8),
   snare: Array(STEPS).fill(0.8),
@@ -17,7 +20,7 @@ const velocity = {
   bass: Array(STEPS).fill(0.7),
 };
 
-// ---------------- MIXER (0–1) ----------------
+// ---------------- MIXER ----------------
 const mix = {
   kick: 0.9,
   snare: 0.8,
@@ -35,8 +38,13 @@ function swing() {
   return Number(document.getElementById("swing")?.value || 0) / 100;
 }
 
+function density(id) {
+  return Number(document.getElementById(id)?.value || 100) / 100;
+}
+
 // ---------------- AUDIO ----------------
 
+// KICK
 function playKick(t, v) {
   const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
@@ -54,6 +62,7 @@ function playKick(t, v) {
   o.stop(t + 0.12);
 }
 
+// SNARE (clean + punch)
 function playSnare(t, v) {
   const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
@@ -71,6 +80,7 @@ function playSnare(t, v) {
   o.stop(t + 0.1);
 }
 
+// HAT
 function playHat(t, v) {
   const buffer = audioCtx.createBuffer(1, 44100, 44100);
   const data = buffer.getChannelData(0);
@@ -94,6 +104,7 @@ function playHat(t, v) {
   src.stop(t + 0.03);
 }
 
+// BASS
 function noteFreq(n) {
   return {
     "D":73,"E":82,"F":87,"G":98,"A":110,"Bb":116,"C":130
@@ -140,10 +151,18 @@ function loop() {
 
   const t = now + swingOffset;
 
-  if (kick[step]) playKick(t, velocity.kick[step]);
-  if (snare[step]) playSnare(t, velocity.snare[step]);
-  if (hat[step]) playHat(t, velocity.hat[step]);
-  if (bass[step]) playBass(bass[step], t, velocity.bass[step]);
+  // DENSITY (ALL CHANNELS RESTORED)
+  if (kick[step] && Math.random() < density("kickDensity"))
+    playKick(t, velocity.kick[step]);
+
+  if (snare[step] && Math.random() < density("snareDensity"))
+    playSnare(t, velocity.snare[step]);
+
+  if (hat[step] && Math.random() < density("hatDensity"))
+    playHat(t, velocity.hat[step]);
+
+  if (bass[step] && Math.random() < density("bassDensity"))
+    playBass(bass[step], t, velocity.bass[step]);
 
   highlight();
 
@@ -156,28 +175,31 @@ function stop() {
   clearTimeout(timer);
 }
 
+// ---------------- MIXER ----------------
+
+function setMix(id, val) {
+  mix[id] = val / 100;
+}
+
 // ---------------- RANDOM ----------------
 
-function randomize(arr, velArr) {
+function randomize(arr, vel) {
   for (let i = 0; i < STEPS; i++) {
     arr[i] = Math.random() > 0.7 ? 1 : 0;
-    velArr[i] = Math.random() * 0.7 + 0.3;
+    vel[i] = Math.random() * 0.7 + 0.3;
   }
   createGrid();
 }
 
 function randomBass() {
   for (let i = 0; i < STEPS; i++) {
-    bass[i] = Math.random() < 0.3 ? "D" : null;
+    bass[i] = Math.random() < 0.3
+      ? scale[Math.floor(Math.random() * scale.length)]
+      : null;
+
     velocity.bass[i] = Math.random() * 0.7 + 0.3;
   }
   createBassGrid();
-}
-
-// ---------------- MIXER ----------------
-
-function setMix(id, val) {
-  mix[id] = val / 100;
 }
 
 // ---------------- GRID ----------------
@@ -188,6 +210,8 @@ function createGrid() {
 
   for (let i = 0; i < STEPS; i++) {
     const c = document.createElement("div");
+    c.style.display = "inline-block";
+    c.style.margin = "2px";
 
     const k = document.createElement("button");
     const s = document.createElement("button");
@@ -227,7 +251,7 @@ function createBassGrid() {
   }
 }
 
-// ---------------- VISUAL ----------------
+// ---------------- VISUAL PLAYHEAD ----------------
 
 function highlight() {
   const g = document.getElementById("grid")?.children;
@@ -235,13 +259,13 @@ function highlight() {
 
   if (g) {
     for (let i = 0; i < g.length; i++) {
-      g[i].style.opacity = (i === step) ? "1" : "0.4";
+      g[i].style.opacity = (i === step) ? "1" : "0.35";
     }
   }
 
   if (b) {
     for (let i = 0; i < b.length; i++) {
-      b[i].style.opacity = (i === step) ? "1" : "0.4";
+      b[i].style.opacity = (i === step) ? "1" : "0.35";
     }
   }
 }
