@@ -221,6 +221,13 @@ function highlightStep() {
   }
 }
 
+function randomize(arr) {
+  for (let i = 0; i < STEPS; i++) {
+    arr[i] = Math.random() > 0.7 ? 1 : 0;
+  }
+
+  createGrid();
+}
 // ---------- INIT ----------
 
 createGrid();
