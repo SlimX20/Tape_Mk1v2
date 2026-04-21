@@ -2,136 +2,67 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Tape MK1 Pro</title>
-
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #0f0f0f;
-      color: #fff;
-      padding: 16px;
-    }
-
-    h1 {
-      margin-bottom: 10px;
-    }
-
-    .section {
-      margin-bottom: 18px;
-      padding: 10px;
-      background: #1a1a1a;
-      border-radius: 8px;
-    }
-
-    button {
-      margin: 2px;
-      padding: 6px;
-      cursor: pointer;
-    }
-
-    #grid button,
-    #bassGrid button {
-      width: 22px;
-      height: 22px;
-      font-size: 10px;
-    }
-
-    .row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    label {
-      font-size: 12px;
-      opacity: 0.8;
-    }
-
-    input[type=range] {
-      width: 120px;
-    }
-  </style>
+  <title>Tape MK1</title>
 </head>
 
 <body>
 
-<h1>🎛️ Tape MK1 Pro</h1>
+<h1>🎛️ Tape MK1</h1>
 
 <!-- TRANSPORT -->
-<div class="section">
-  <button onclick="start()">▶ Play</button>
-  <button onclick="stop()">⏹ Stop</button>
-</div>
+<button onclick="start()">▶ Play</button>
+<button onclick="stop()">⏹ Stop</button>
 
-<!-- GLOBAL CONTROL -->
-<div class="section">
-  <div class="row">
-    <div>
-      <label>BPM</label><br>
-      <input id="bpm" type="range" min="60" max="160" value="90">
-    </div>
+<br><br>
 
-    <div>
-      <label>Swing</label><br>
-      <input id="swing" type="range" min="0" max="100" value="0">
-    </div>
-  </div>
-</div>
+<!-- GLOBAL CONTROLS -->
+<label>BPM</label>
+<input id="bpm" type="range" min="60" max="160" value="90">
+
+<label>Swing</label>
+<input id="swing" type="range" min="0" max="100" value="0">
+
+<br><br>
 
 <!-- RANDOM -->
-<div class="section">
-  <button onclick="randomize(kick, velocity.kick)">Random Kick</button>
-  <button onclick="randomize(snare, velocity.snare)">Random Snare</button>
-  <button onclick="randomize(hat, velocity.hat)">Random Hat</button>
-  <button onclick="randomBass()">Random Bass</button>
-</div>
+<button onclick="randomize(kick, velocity.kick)">Random Kick</button>
+<button onclick="randomize(snare, velocity.snare)">Random Snare</button>
+<button onclick="randomize(hat, velocity.hat)">Random Hat</button>
+<button onclick="randomBass()">Random Bass</button>
+
+<br><br>
 
 <!-- CLEAR -->
-<div class="section">
-  <button onclick="kick.fill(0); createGrid()">Clear Kick</button>
-  <button onclick="snare.fill(0); createGrid()">Clear Snare</button>
-  <button onclick="hat.fill(0); createGrid()">Clear Hat</button>
-  <button onclick="bass.fill(null); createBassGrid()">Clear Bass</button>
-</div>
+<button onclick="kick.fill(0); createGrid()">Clear Kick</button>
+<button onclick="snare.fill(0); createGrid()">Clear Snare</button>
+<button onclick="hat.fill(0); createGrid()">Clear Hat</button>
+<button onclick="bass.fill(null); createBassGrid()">Clear Bass</button>
 
-<!-- MIXER -->
-<div class="section">
-  <h3>Mixer</h3>
+<br><br>
 
-  <div class="row">
-    <div>
-      <label>Kick</label><br>
-      <input type="range" min="0" max="100" value="90" oninput="setMix('kick', this.value)">
-    </div>
+<!-- 🔥 MIXER (NYTT, ENDA TILLÄGG) -->
+<h3>Mixer</h3>
 
-    <div>
-      <label>Snare</label><br>
-      <input type="range" min="0" max="100" value="80" oninput="setMix('snare', this.value)">
-    </div>
+<label>Kick</label>
+<input type="range" min="0" max="100" value="90" oninput="setMix('kick', this.value)">
 
-    <div>
-      <label>Hat</label><br>
-      <input type="range" min="0" max="100" value="50" oninput="setMix('hat', this.value)">
-    </div>
+<label>Snare</label>
+<input type="range" min="0" max="100" value="80" oninput="setMix('snare', this.value)">
 
-    <div>
-      <label>Bass</label><br>
-      <input type="range" min="0" max="100" value="70" oninput="setMix('bass', this.value)">
-    </div>
-  </div>
-</div>
+<label>Hat</label>
+<input type="range" min="0" max="100" value="50" oninput="setMix('hat', this.value)">
 
-<!-- GRIDS -->
-<div class="section">
-  <h3>Drum Grid (32-step)</h3>
-  <div id="grid"></div>
-</div>
+<label>Bass</label>
+<input type="range" min="0" max="100" value="70" oninput="setMix('bass', this.value)">
 
-<div class="section">
-  <h3>Bass Grid</h3>
-  <div id="bassGrid"></div>
-</div>
+<br><br>
+
+<!-- GRIDS (TOUCH NOTHING) -->
+<div id="grid"></div>
+
+<br>
+
+<div id="bassGrid"></div>
 
 <script src="script.js"></script>
 
