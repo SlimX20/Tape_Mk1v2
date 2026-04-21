@@ -14,11 +14,11 @@ const scale = ["D","E","F","G","A","Bb","C"];
 
 // ---------------- CONTROLS ----------------
 
-function bpm() {
+function getBPM() {
   return Number(document.getElementById("bpm")?.value || 90);
 }
 
-function swing() {
+function getSwing() {
   return Number(document.getElementById("swing")?.value || 0) / 100;
 }
 
@@ -26,7 +26,7 @@ function dens(id) {
   return Number(document.getElementById(id)?.value || 100) / 100;
 }
 
-// ---------------- AUDIO CORE ----------------
+// ---------------- AUDIO ----------------
 
 // KICK (punch)
 function playKick(t) {
@@ -46,7 +46,7 @@ function playKick(t) {
   o.stop(t + 0.12);
 }
 
-// SNARE (CLEAN + punch, inte brus)
+// SNARE (clean hiphop snare)
 function playSnare(t) {
   const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
@@ -89,7 +89,7 @@ function playHat(t) {
 }
 
 // BASS
-function noteFreq(n) {
+function noteToFreq(n) {
   return {
     "D":73,"E":82,"F":87,"G":98,"A":110,"Bb":116,"C":130
   }[n] || 73;
@@ -99,7 +99,7 @@ function playBass(n, t) {
   const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
 
-  o.frequency.value = noteFreq(n);
+  o.frequency.value = noteToFreq(n);
 
   g.gain.setValueAtTime(0.25, t);
   g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
@@ -123,10 +123,10 @@ function start() {
 }
 
 function loop() {
-  const bpm = bpm();
-  const sw = swing();
+  const bpmVal = getBPM();
+  const sw = getSwing();
 
-  const stepTime = (60 / bpm) / 4;
+  const stepTime = (60 / bpmVal) / 4;
 
   const now = audioCtx.currentTime;
 
@@ -135,14 +135,10 @@ function loop() {
 
   const t = now + swingOffset;
 
-  // DENSITY
   if (kick[step] && Math.random() < dens("kickDensity")) playKick(t);
   if (snare[step] && Math.random() < dens("snareDensity")) playSnare(t);
   if (hat[step] && Math.random() < dens("hatDensity")) playHat(t);
-
-  if (bass[step] && Math.random() < dens("bassDensity")) {
-    playBass(bass[step], t);
-  }
+  if (bass[step] && Math.random() < dens("bassDensity")) playBass(bass[step], t);
 
   highlight();
 
