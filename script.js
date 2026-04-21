@@ -32,7 +32,7 @@ function playKick(time) {
   osc.stop(time + 0.15);
 }
 
-// SNARE (noise + body)
+// SNARE (short + filtered feel)
 function playSnare(time) {
 
   // NOISE (short + filtered feel)
