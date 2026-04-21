@@ -2,43 +2,89 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Tape MK1</title>
+  <title>Tape MK1 v1.2</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #fff;
+      padding: 12px;
+    }
+
+    button {
+      margin: 2px;
+      padding: 6px;
+    }
+
+    #grid button, #bassGrid button {
+      width: 22px;
+      height: 22px;
+      font-size: 10px;
+    }
+
+    .row {
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 
 <body>
 
 <h1>🎛️ Tape MK1</h1>
 
+<!-- TRANSPORT -->
 <button onclick="start()">▶ Play</button>
 <button onclick="stop()">⏹ Stop</button>
 
 <br><br>
 
-<label>BPM</label>
-<input type="range" min="60" max="140" value="80" id="bpm">
+<!-- GLOBAL CONTROLS -->
+<div class="row">
+  <label>BPM</label>
+  <input id="bpm" type="range" min="60" max="140" value="90">
 
-<label>Swing</label>
-<input type="range" min="0" max="100" value="0" id="swing">
+  <label>Swing</label>
+  <input id="swing" type="range" min="0" max="100" value="0">
+</div>
 
-<br><br>
+<br>
 
+<!-- RANDOM -->
 <button onclick="randomize(kick)">Random Kick</button>
 <button onclick="randomize(snare)">Random Snare</button>
 <button onclick="randomize(hat)">Random Hat</button>
-
 <button onclick="randomBass()">Random Bass</button>
-  
-  <button onclick="clearTrack(kick)">Clear Kick</button>
-<button onclick="clearTrack(snare)">Clear Snare</button>
-<button onclick="clearTrack(hat)">Clear Hat</button>
-<button onclick="clearTrack(bass)">Clear Bass</button>
 
 <br><br>
 
-<label>Bass Density</label>
-<input type="range" min="1" max="8" value="4" id="bassDensity">
+<!-- CLEAR -->
+<button onclick="kick.fill(0); createGrid();">Clear Kick</button>
+<button onclick="snare.fill(0); createGrid();">Clear Snare</button>
+<button onclick="hat.fill(0); createGrid();">Clear Hat</button>
+<button onclick="bass.fill(null); createBassGrid();">Clear Bass</button>
 
-<h3>Drum Grid (32 steps)</h3>
+<br><br>
+
+<!-- DENSITY -->
+<h3>Density</h3>
+
+<label>Kick</label>
+<input id="kickDensity" type="range" min="0" max="100" value="100">
+
+<label>Snare</label>
+<input id="snareDensity" type="range" min="0" max="100" value="80">
+
+<label>Hat</label>
+<input id="hatDensity" type="range" min="0" max="100" value="70">
+
+<label>Bass</label>
+<input id="bassDensity" type="range" min="0" max="100" value="60">
+
+<br><br>
+
+<!-- GRID -->
+<h3>Drum Grid (32 step)</h3>
 <div id="grid"></div>
 
 <h3>Bass Grid</h3>
