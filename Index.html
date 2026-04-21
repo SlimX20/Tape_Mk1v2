@@ -1,1 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Tape MK1</title>
+</head>
 
+<body>
+
+<h1>🎛️ Tape MK1</h1>
+
+<button onclick="start()">▶ Play</button>
+<button onclick="stop()">⏹ Stop</button>
+
+<br><br>
+
+<label>BPM</label>
+<input type="range" min="60" max="140" value="80" id="bpm">
+
+<label>Swing</label>
+<input type="range" min="0" max="100" value="0" id="swing">
+
+<br><br>
+
+<button onclick="randomize(kick)">Random Kick</button>
+<button onclick="randomize(snare)">Random Snare</button>
+<button onclick="randomize(hat)">Random Hat</button>
+
+<button onclick="randomBass()">Random Bass</button>
+
+<br><br>
+
+<label>Bass Density</label>
+<input type="range" min="1" max="8" value="4" id="bassDensity">
+
+<h3>Drum Grid (32 steps)</h3>
+<div id="grid"></div>
+
+<h3>Bass Grid</h3>
+<div id="bassGrid"></div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
