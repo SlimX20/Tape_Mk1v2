@@ -2,76 +2,73 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Tape MK1 Grid</title>
+<title>Tape MK1</title>
 
 <style>
 body {
-  background: #0b0b0b;
-  color: #fff;
+  background:#0b0b0b;
+  color:white;
   font-family: monospace;
-  padding: 12px;
+  padding:12px;
 }
 
-/* TOP BAR */
 .top {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 12px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:12px;
 }
 
-button {
-  background: #1c1c1c;
-  color: white;
-  border: 1px solid #333;
-  padding: 6px 10px;
-}
-
-/* GRID WRAPPER */
 .grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
-/* LANE */
 .lane {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
-/* LABEL */
 .label {
-  width: 60px;
-  opacity: 0.7;
+  width:70px;
+  opacity:0.7;
 }
 
-/* STEPS */
+/* step grid */
 .steps {
-  display: flex;
-  gap: 2px;
-  flex: 1;
+  display:flex;
+  gap:2px;
+  flex:1;
 }
 
-/* STEP BOX */
 .step {
-  width: 14px;
-  height: 22px;
-  background: #1a1a1a;
-  border: 1px solid #222;
-  transition: 0.1s;
+  width:14px;
+  height:22px;
+  background:#1a1a1a;
+  border:1px solid #222;
 }
 
-/* ACTIVE STEP */
 .step.on {
-  background: #ff3c3c;
-  box-shadow: 0 0 6px #ff3c3c;
+  background:#ff3c3c;
 }
 
-/* PLAYHEAD */
 .step.playhead {
-  border-color: #00d9ff;
+  border-color:#00d9ff;
+}
+
+/* mixer */
+.mixer {
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+.channel {
+  border:1px solid #333;
+  padding:6px;
 }
 </style>
 </head>
@@ -83,7 +80,7 @@ button {
   <button onclick="stop()">⏹ Stop</button>
 
   <label>BPM</label>
-  <input id="bpm" type="range" min="60" max="160" value="90">
+  <input id="bpm" type="number" min="60" max="220" value="90">
 
   <label>Swing</label>
   <input id="swing" type="range" min="0" max="100" value="0">
@@ -94,21 +91,29 @@ button {
   <div class="lane">
     <div class="label">KICK</div>
     <div id="kickRow" class="steps"></div>
+    <button onclick="randomLane('kick')">RND</button>
+    <button onclick="clearLane('kick')">CLR</button>
   </div>
 
   <div class="lane">
     <div class="label">SNARE</div>
     <div id="snareRow" class="steps"></div>
+    <button onclick="randomLane('snare')">RND</button>
+    <button onclick="clearLane('snare')">CLR</button>
   </div>
 
   <div class="lane">
     <div class="label">HAT</div>
     <div id="hatRow" class="steps"></div>
+    <button onclick="randomLane('hat')">RND</button>
+    <button onclick="clearLane('hat')">CLR</button>
   </div>
 
   <div class="lane">
     <div class="label">BASS</div>
     <div id="bassRow" class="steps"></div>
+    <button onclick="randomLane('bass')">RND</button>
+    <button onclick="clearLane('bass')">CLR</button>
   </div>
 
 </div>
