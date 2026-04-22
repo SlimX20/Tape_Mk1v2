@@ -21,7 +21,7 @@ function swingValue(){
   return parseInt(document.getElementById("swing").value) / 100;
 }
 
-// ---------------- SOUND ----------------
+// ---------------- AUDIO ----------------
 
 function kickSound(t){
   const osc = audioCtx.createOscillator();
@@ -40,62 +40,40 @@ function kickSound(t){
   osc.stop(t + 0.25);
 }
 
-// 🥁 FIXED SNARE (punch + body)
+// 🥁 SNARE (CLEAN - NO NOISE)
 function snareSound(t){
-
-  // BODY
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
   osc.type = "triangle";
-  osc.frequency.setValueAtTime(180, t);
-  osc.frequency.exponentialRampToValueAtTime(120, t + 0.1);
+  osc.frequency.setValueAtTime(200, t);
+  osc.frequency.exponentialRampToValueAtTime(140, t + 0.08);
 
-  gain.gain.setValueAtTime(0.5, t);
-  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+  gain.gain.setValueAtTime(0.6, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start(t);
   osc.stop(t + 0.2);
+}
 
-  // NOISE
+// 🔥 HAT (LOUDER + CRISPER)
+function hatSound(t){
   const buffer = audioCtx.createBuffer(1, 44100, 44100);
   const data = buffer.getChannelData(0);
 
   for(let i=0;i<data.length;i++){
-    data[i] = (Math.random()*2-1) * Math.exp(-i/12000);
-  }
-
-  const src = audioCtx.createBufferSource();
-  src.buffer = buffer;
-
-  const nGain = audioCtx.createGain();
-  nGain.gain.setValueAtTime(0.3, t);
-  nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-
-  src.connect(nGain);
-  nGain.connect(audioCtx.destination);
-
-  src.start(t);
-  src.stop(t + 0.15);
-}
-
-// HAT
-function hatSound(t){
-  const buffer = audioCtx.createBuffer(1,44100,44100);
-  const data = buffer.getChannelData(0);
-
-  for(let i=0;i<data.length;i++){
-    data[i] = Math.random()*0.3;
+    data[i] = Math.random() * 0.4; // stronger signal
   }
 
   const src = audioCtx.createBufferSource();
   src.buffer = buffer;
 
   const gain = audioCtx.createGain();
-  gain.gain.value = 0.12;
+  gain.gain.setValueAtTime(0.35, t); // 🔊 MUCH LOUDER
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
 
   src.connect(gain);
   gain.connect(audioCtx.destination);
@@ -104,7 +82,7 @@ function hatSound(t){
   src.stop(t + 0.05);
 }
 
-// 🔊 FIXED BASS (always audible)
+// 🔊 BASS
 function bassSound(note,t){
   if(!note) return;
 
@@ -142,9 +120,7 @@ function start(){
   interval = setInterval(()=>{
 
     const now = audioCtx.currentTime;
-
     const swing = (step % 2 === 1) ? swingValue() * 0.05 : 0;
-
     const t = now + swing;
 
     if(lanes.kick[step]) kickSound(t);
@@ -210,7 +186,7 @@ function clearLane(lane){
   createGrid();
 }
 
-// ---------------- PLAYHEAD ----------------
+// ---------------- UI ----------------
 
 function updateUI(pos){
   document.querySelectorAll(".step").forEach(el=>{
