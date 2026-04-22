@@ -25,6 +25,29 @@ body {
   flex-direction:column;
   gap:10px;
 }
+  <h3>MIXER</h3>
+
+<div>
+  KICK vol <input type="range" min="0" max="100" value="80" oninput="setVolume('kick',this.value)">
+  density <input type="range" min="0" max="100" value="100" oninput="setDensity('kick',this.value)">
+</div>
+
+<div>
+  SNARE vol <input type="range" min="0" max="100" value="80" oninput="setVolume('snare',this.value)">
+  density <input type="range" min="0" max="100" value="100" oninput="setDensity('snare',this.value)">
+</div>
+
+<div>
+  HAT vol <input type="range" min="0" max="100" value="80" oninput="setVolume('hat',this.value)">
+  density <input type="range" min="0" max="100" value="100" oninput="setDensity('hat',this.value)">
+</div>
+
+<div>
+  BASS vol <input type="range" min="0" max="100" value="80" oninput="setVolume('bass',this.value)">
+  density <input type="range" min="0" max="100" value="100" oninput="setDensity('bass',this.value)">
+</div>
+
+<button onclick="generateBass()">EUCLID BASS</button>
 
 .lane {
   display:flex;
