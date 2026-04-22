@@ -2,11 +2,9 @@ let audioCtx;
 let interval;
 
 const STEPS = 32;
-
-// 👉 FIX: vänster → höger
 let step = 0;
 
-// ---------------- DATA ----------------
+// ---------------- STATE ----------------
 const lanes = {
   kick:  Array(STEPS).fill(0),
   snare: Array(STEPS).fill(0),
@@ -14,61 +12,83 @@ const lanes = {
   bass:  Array(STEPS).fill(null)
 };
 
-// ---------------- BPM ----------------
-function bpm() {
+// ---------------- BPM / SWING ----------------
+function bpm(){
   return Math.min(220, Math.max(60, parseInt(document.getElementById("bpm").value)));
 }
 
-function swingValue() {
+function swingValue(){
   return parseInt(document.getElementById("swing").value) / 100;
 }
 
-// ---------------- AUDIO ----------------
+// ---------------- SOUND ----------------
 
 function kickSound(t){
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
   osc.type = "sine";
-  osc.frequency.value = 80;
+  osc.frequency.setValueAtTime(90, t);
 
-  gain.gain.setValueAtTime(0.8,t);
-  gain.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+  gain.gain.setValueAtTime(0.9, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start(t);
-  osc.stop(t+0.25);
+  osc.stop(t + 0.25);
 }
 
+// 🥁 FIXED SNARE (punch + body)
 function snareSound(t){
-  const buffer = audioCtx.createBuffer(1,44100,44100);
+
+  // BODY
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(180, t);
+  osc.frequency.exponentialRampToValueAtTime(120, t + 0.1);
+
+  gain.gain.setValueAtTime(0.5, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start(t);
+  osc.stop(t + 0.2);
+
+  // NOISE
+  const buffer = audioCtx.createBuffer(1, 44100, 44100);
   const data = buffer.getChannelData(0);
 
   for(let i=0;i<data.length;i++){
-    data[i]=Math.random()*2-1;
+    data[i] = (Math.random()*2-1) * Math.exp(-i/12000);
   }
 
   const src = audioCtx.createBufferSource();
   src.buffer = buffer;
 
-  const gain = audioCtx.createGain();
-  gain.gain.value = 0.35;
+  const nGain = audioCtx.createGain();
+  nGain.gain.setValueAtTime(0.3, t);
+  nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
 
-  src.connect(gain);
-  gain.connect(audioCtx.destination);
+  src.connect(nGain);
+  nGain.connect(audioCtx.destination);
 
   src.start(t);
-  src.stop(t+0.2);
+  src.stop(t + 0.15);
 }
 
+// HAT
 function hatSound(t){
   const buffer = audioCtx.createBuffer(1,44100,44100);
   const data = buffer.getChannelData(0);
 
   for(let i=0;i<data.length;i++){
-    data[i]=Math.random()*0.3;
+    data[i] = Math.random()*0.3;
   }
 
   const src = audioCtx.createBufferSource();
@@ -81,10 +101,13 @@ function hatSound(t){
   gain.connect(audioCtx.destination);
 
   src.start(t);
-  src.stop(t+0.05);
+  src.stop(t + 0.05);
 }
 
+// 🔊 FIXED BASS (always audible)
 function bassSound(note,t){
+  if(!note) return;
+
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
@@ -95,17 +118,17 @@ function bassSound(note,t){
     C:130
   };
 
-  osc.type="sine";
-  osc.frequency.value=map[note]||80;
+  osc.type = "sine";
+  osc.frequency.value = map[note] || 80;
 
-  gain.gain.setValueAtTime(0.6,t);
-  gain.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+  gain.gain.setValueAtTime(0.8, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start(t);
-  osc.stop(t+0.4);
+  osc.stop(t + 0.4);
 }
 
 // ---------------- ENGINE ----------------
@@ -113,15 +136,12 @@ function bassSound(note,t){
 function start(){
   if(interval) clearInterval(interval);
 
-  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-
-  step = 0; // 👉 LEFT → RIGHT reset
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  step = 0;
 
   interval = setInterval(()=>{
 
     const now = audioCtx.currentTime;
-
-    const spb = 60 / bpm() / 4;
 
     const swing = (step % 2 === 1) ? swingValue() * 0.05 : 0;
 
@@ -134,9 +154,9 @@ function start(){
 
     updateUI(step);
 
-    step = (step + 1) % STEPS; // 👉 FIXED DIRECTION
+    step = (step + 1) % STEPS;
 
-  },120);
+  }, 120);
 }
 
 function stop(){
@@ -154,33 +174,34 @@ function makeLane(lane){
   row.innerHTML = "";
 
   for(let i=0;i<STEPS;i++){
-    const s = document.createElement("div");
-    s.className = "step";
+    const cell = document.createElement("div");
+    cell.className = "step";
 
-    if(lanes[lane][i]) s.classList.add("on");
+    if(lanes[lane][i]) cell.classList.add("on");
 
-    s.onclick = () => {
-      lanes[lane][i] = lanes[lane][i]
-        ? 0
-        : (lane === "bass" ? "D" : 1);
+    cell.onclick = () => {
+      lanes[lane][i] =
+        lanes[lane][i]
+          ? 0
+          : (lane === "bass" ? "D" : 1);
 
-      createGrid(); // 👉 FIX: alltid re-render
+      createGrid();
     };
 
-    row.appendChild(s);
+    row.appendChild(cell);
   }
 }
 
-// ---------------- RANDOM ----------------
+// ---------------- TOOLS ----------------
 
 function randomLane(lane){
   for(let i=0;i<STEPS;i++){
-    lanes[lane][i] = Math.random() > 0.75 ? (lane==="bass"?"D":1) : 0;
+    lanes[lane][i] = Math.random() > 0.7
+      ? (lane === "bass" ? "D" : 1)
+      : 0;
   }
   createGrid();
 }
-
-// ---------------- CLEAR ----------------
 
 function clearLane(lane){
   for(let i=0;i<STEPS;i++){
@@ -203,5 +224,5 @@ function updateUI(pos){
   });
 }
 
-// init
+// INIT
 window.onload = createGrid;
