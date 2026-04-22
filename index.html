@@ -1,87 +1,117 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Tape MK1</title>
+<meta charset="UTF-8">
+<title>Tape MK1 Grid</title>
+
+<style>
+body {
+  background: #0b0b0b;
+  color: #fff;
+  font-family: monospace;
+  padding: 12px;
+}
+
+/* TOP BAR */
+.top {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+button {
+  background: #1c1c1c;
+  color: white;
+  border: 1px solid #333;
+  padding: 6px 10px;
+}
+
+/* GRID WRAPPER */
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* LANE */
+.lane {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* LABEL */
+.label {
+  width: 60px;
+  opacity: 0.7;
+}
+
+/* STEPS */
+.steps {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+}
+
+/* STEP BOX */
+.step {
+  width: 14px;
+  height: 22px;
+  background: #1a1a1a;
+  border: 1px solid #222;
+  transition: 0.1s;
+}
+
+/* ACTIVE STEP */
+.step.on {
+  background: #ff3c3c;
+  box-shadow: 0 0 6px #ff3c3c;
+}
+
+/* PLAYHEAD */
+.step.playhead {
+  border-color: #00d9ff;
+}
+</style>
 </head>
 
 <body>
 
-<h1>🎛️ Tape MK1</h1>
+<div class="top">
+  <button onclick="start()">▶ Play</button>
+  <button onclick="stop()">⏹ Stop</button>
 
-<!-- TRANSPORT -->
-<button onclick="start()">▶ Play</button>
-<button onclick="stop()">⏹ Stop</button>
+  <label>BPM</label>
+  <input id="bpm" type="range" min="60" max="160" value="90">
 
-<br><br>
+  <label>Swing</label>
+  <input id="swing" type="range" min="0" max="100" value="0">
+</div>
 
-<!-- GLOBAL CONTROLS -->
-<label>BPM</label>
-<input id="bpm" type="range" min="60" max="160" value="90">
+<div class="grid">
 
-<label>Swing</label>
-<input id="swing" type="range" min="0" max="100" value="0">
+  <div class="lane">
+    <div class="label">KICK</div>
+    <div id="kickRow" class="steps"></div>
+  </div>
 
-<br><br>
+  <div class="lane">
+    <div class="label">SNARE</div>
+    <div id="snareRow" class="steps"></div>
+  </div>
 
-<!-- RANDOM -->
-<button onclick="randomize(kick, velocity.kick)">Random Kick</button>
-<button onclick="randomize(snare, velocity.snare)">Random Snare</button>
-<button onclick="randomize(hat, velocity.hat)">Random Hat</button>
-<button onclick="randomBass()">Random Bass</button>
+  <div class="lane">
+    <div class="label">HAT</div>
+    <div id="hatRow" class="steps"></div>
+  </div>
 
-<br><br>
+  <div class="lane">
+    <div class="label">BASS</div>
+    <div id="bassRow" class="steps"></div>
+  </div>
 
-<!-- CLEAR -->
-<button onclick="kick.fill(0); createGrid()">Clear Kick</button>
-<button onclick="snare.fill(0); createGrid()">Clear Snare</button>
-<button onclick="hat.fill(0); createGrid()">Clear Hat</button>
-<button onclick="bass.fill(null); createBassGrid()">Clear Bass</button>
-
-<br><br>
-
-<!-- MIXER -->
-<h3>Mixer</h3>
-
-<label>Kick</label>
-<input type="range" min="0" max="100" value="90" oninput="setMix('kick', this.value)">
-
-<label>Snare</label>
-<input type="range" min="0" max="100" value="80" oninput="setMix('snare', this.value)">
-
-<label>Hat</label>
-<input type="range" min="0" max="100" value="50" oninput="setMix('hat', this.value)">
-
-<label>Bass</label>
-<input type="range" min="0" max="100" value="70" oninput="setMix('bass', this.value)">
-
-<br><br>
-
-<!-- DENSITY (VIKTIGT — matchar script.js) -->
-<h3>Density</h3>
-
-<label>Kick Density</label>
-<input id="kickDensity" type="range" min="0" max="100" value="100">
-
-<label>Snare Density</label>
-<input id="snareDensity" type="range" min="0" max="100" value="100">
-
-<label>Hat Density</label>
-<input id="hatDensity" type="range" min="0" max="100" value="100">
-
-<label>Bass Density</label>
-<input id="bassDensity" type="range" min="0" max="100" value="100">
-
-<br><br>
-
-<!-- GRIDS -->
-<h3>Drum Grid (32-step)</h3>
-<div id="grid"></div>
-
-<br>
-
-<h3>Bass Grid</h3>
-<div id="bassGrid"></div>
+</div>
 
 <script src="script.js"></script>
 
