@@ -25,29 +25,6 @@ body {
   flex-direction:column;
   gap:10px;
 }
-  <h3>MIXER</h3>
-
-<div>
-  KICK vol <input type="range" min="0" max="100" value="80" oninput="setVolume('kick',this.value)">
-  density <input type="range" min="0" max="100" value="100" oninput="setDensity('kick',this.value)">
-</div>
-
-<div>
-  SNARE vol <input type="range" min="0" max="100" value="80" oninput="setVolume('snare',this.value)">
-  density <input type="range" min="0" max="100" value="100" oninput="setDensity('snare',this.value)">
-</div>
-
-<div>
-  HAT vol <input type="range" min="0" max="100" value="80" oninput="setVolume('hat',this.value)">
-  density <input type="range" min="0" max="100" value="100" oninput="setDensity('hat',this.value)">
-</div>
-
-<div>
-  BASS vol <input type="range" min="0" max="100" value="80" oninput="setVolume('bass',this.value)">
-  density <input type="range" min="0" max="100" value="100" oninput="setDensity('bass',this.value)">
-</div>
-
-<button onclick="generateBass()">EUCLID BASS</button>
 
 .lane {
   display:flex;
@@ -57,10 +34,8 @@ body {
 
 .label {
   width:70px;
-  opacity:0.7;
 }
 
-/* step grid */
 .steps {
   display:flex;
   gap:2px;
@@ -82,16 +57,15 @@ body {
   border-color:#00d9ff;
 }
 
-/* mixer */
+/* MIXER */
 .mixer {
-  display:flex;
-  gap:10px;
-  margin-top:10px;
+  margin-top:20px;
+  border-top:1px solid #333;
+  padding-top:10px;
 }
 
 .channel {
-  border:1px solid #333;
-  padding:6px;
+  margin-bottom:10px;
 }
 </style>
 </head>
@@ -102,11 +76,8 @@ body {
   <button onclick="start()">▶ Play</button>
   <button onclick="stop()">⏹ Stop</button>
 
-  <label>BPM</label>
-  <input id="bpm" type="number" min="60" max="220" value="90">
-
-  <label>Swing</label>
-  <input id="swing" type="range" min="0" max="100" value="0">
+  BPM <input id="bpm" type="number" min="60" max="220" value="90">
+  Swing <input id="swing" type="range" min="0" max="100" value="0">
 </div>
 
 <div class="grid">
@@ -138,6 +109,51 @@ body {
     <button onclick="randomLane('bass')">RND</button>
     <button onclick="clearLane('bass')">CLR</button>
   </div>
+
+</div>
+
+<!-- 🎛️ MIXER -->
+<div class="mixer">
+
+  <h3>MIXER</h3>
+
+  <div class="channel">
+    KICK vol
+    <input type="range" min="0" max="100" value="80"
+      oninput="setVolume('kick', this.value)">
+    density
+    <input type="range" min="0" max="100" value="100"
+      oninput="setDensity('kick', this.value)">
+  </div>
+
+  <div class="channel">
+    SNARE vol
+    <input type="range" min="0" max="100" value="80"
+      oninput="setVolume('snare', this.value)">
+    density
+    <input type="range" min="0" max="100" value="100"
+      oninput="setDensity('snare', this.value)">
+  </div>
+
+  <div class="channel">
+    HAT vol
+    <input type="range" min="0" max="100" value="80"
+      oninput="setVolume('hat', this.value)">
+    density
+    <input type="range" min="0" max="100" value="100"
+      oninput="setDensity('hat', this.value)">
+  </div>
+
+  <div class="channel">
+    BASS vol
+    <input type="range" min="0" max="100" value="80"
+      oninput="setVolume('bass', this.value)">
+    density
+    <input type="range" min="0" max="100" value="100"
+      oninput="setDensity('bass', this.value)">
+  </div>
+
+  <button onclick="generateBass()">EUCLID BASS</button>
 
 </div>
 
