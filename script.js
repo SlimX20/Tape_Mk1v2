@@ -1,275 +1,195 @@
 let audioCtx;
-let timer;
-let step = 0;
+let interval;
 
 const STEPS = 32;
 
-// ---------------- PATTERNS ----------------
-const kick = Array(STEPS).fill(0);
-const snare = Array(STEPS).fill(0);
-const hat = Array(STEPS).fill(0);
-const bass = Array(STEPS).fill(null);
+// direction: RIGHT → LEFT
+let step = STEPS - 1;
 
-const scale = ["D","E","F","G","A","Bb","C"];
-
-// ---------------- VELOCITY ----------------
-const velocity = {
-  kick: Array(STEPS).fill(0.8),
-  snare: Array(STEPS).fill(0.8),
-  hat: Array(STEPS).fill(0.6),
-  bass: Array(STEPS).fill(0.7),
+// 🎚️ DATA
+const lanes = {
+  kick:  Array(STEPS).fill(0),
+  snare: Array(STEPS).fill(0),
+  hat:   Array(STEPS).fill(0),
+  bass:  Array(STEPS).fill(null)
 };
-
-// ---------------- MIXER ----------------
-const mix = {
-  kick: 0.9,
-  snare: 0.8,
-  hat: 0.5,
-  bass: 0.7
-};
-
-// ---------------- CONTROLS ----------------
-
-function bpm() {
-  return Number(document.getElementById("bpm")?.value || 90);
-}
-
-function swing() {
-  return Number(document.getElementById("swing")?.value || 0) / 100;
-}
-
-function density(id) {
-  return Number(document.getElementById(id)?.value || 100) / 100;
-}
 
 // ---------------- AUDIO ----------------
 
-// KICK
-function playKick(t, v) {
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
+function playKick(time) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
 
-  o.frequency.setValueAtTime(140, t);
-  o.frequency.exponentialRampToValueAtTime(55, t + 0.12);
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(90, time);
 
-  g.gain.setValueAtTime(v * mix.kick, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+  gain.gain.setValueAtTime(0.8, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
 
-  o.connect(g);
-  g.connect(audioCtx.destination);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
 
-  o.start(t);
-  o.stop(t + 0.12);
+  osc.start(time);
+  osc.stop(time + 0.25);
 }
 
-// SNARE (clean + punch)
-function playSnare(t, v) {
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-
-  o.type = "triangle";
-  o.frequency.setValueAtTime(180, t);
-
-  g.gain.setValueAtTime(v * mix.snare, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-
-  o.connect(g);
-  g.connect(audioCtx.destination);
-
-  o.start(t);
-  o.stop(t + 0.1);
-}
-
-// HAT
-function playHat(t, v) {
+function playSnare(time) {
   const buffer = audioCtx.createBuffer(1, 44100, 44100);
   const data = buffer.getChannelData(0);
 
   for (let i = 0; i < data.length; i++) {
-    data[i] = (Math.random() * 2 - 1) * 0.3;
+    data[i] = Math.random() * 2 - 1;
   }
 
   const src = audioCtx.createBufferSource();
-  const g = audioCtx.createGain();
-
   src.buffer = buffer;
 
-  g.gain.setValueAtTime(v * mix.hat, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+  const gain = audioCtx.createGain();
+  gain.gain.value = 0.4;
 
-  src.connect(g);
-  g.connect(audioCtx.destination);
+  src.connect(gain);
+  gain.connect(audioCtx.destination);
 
-  src.start(t);
-  src.stop(t + 0.03);
+  src.start(time);
+  src.stop(time + 0.2);
 }
 
-// BASS
-function noteFreq(n) {
-  return {
-    "D":73,"E":82,"F":87,"G":98,"A":110,"Bb":116,"C":130
-  }[n] || 73;
+function playHat(time) {
+  const buffer = audioCtx.createBuffer(1, 44100, 44100);
+  const data = buffer.getChannelData(0);
+
+  for (let i = 0; i < data.length; i++) {
+    data[i] = Math.random() * 0.5;
+  }
+
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+
+  const gain = audioCtx.createGain();
+  gain.gain.value = 0.15;
+
+  src.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  src.start(time);
+  src.stop(time + 0.05);
 }
 
-function playBass(n, t, v) {
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
+function playBass(note, time) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
 
-  o.frequency.value = noteFreq(n);
+  const freqMap = {
+    D: 73,
+    A: 110,
+    G: 98,
+    C: 130
+  };
 
-  g.gain.setValueAtTime(v * mix.bass, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+  osc.type = "sine";
+  osc.frequency.value = freqMap[note] || 80;
 
-  o.connect(g);
-  g.connect(audioCtx.destination);
+  gain.gain.setValueAtTime(0.6, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
 
-  o.start(t);
-  o.stop(t + 0.2);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start(time);
+  osc.stop(time + 0.4);
+}
+
+// ---------------- BPM ----------------
+
+function bpm() {
+  return parseInt(document.getElementById("bpm").value);
+}
+
+function swingValue() {
+  return parseInt(document.getElementById("swing").value) / 100;
 }
 
 // ---------------- ENGINE ----------------
 
 function start() {
-  if (timer) clearTimeout(timer);
+  if (interval) clearInterval(interval);
 
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  step = 0;
 
-  loop();
-}
+  step = STEPS - 1;
 
-function loop() {
-  const bpmVal = bpm();
-  const sw = swing();
+  interval = setInterval(() => {
+    const now = audioCtx.currentTime;
 
-  const stepTime = (60 / bpmVal) / 4;
+    const stepTime = (60 / bpm()) / 4;
 
-  const now = audioCtx.currentTime;
+    const isOff = step % 2 === 1;
+    const swing = isOff ? swingValue() * 0.05 : 0;
 
-  const off = step % 2 === 1;
-  const swingOffset = off ? stepTime * sw : 0;
+    const t = now + swing;
 
-  const t = now + swingOffset;
+    // PLAY
+    if (lanes.kick[step]) playKick(t);
+    if (lanes.snare[step]) playSnare(t);
+    if (lanes.hat[step]) playHat(t);
+    if (lanes.bass[step]) playBass(lanes.bass[step], t);
 
-  // DENSITY (ALL CHANNELS RESTORED)
-  if (kick[step] && Math.random() < density("kickDensity"))
-    playKick(t, velocity.kick[step]);
+    updateUI(step);
 
-  if (snare[step] && Math.random() < density("snareDensity"))
-    playSnare(t, velocity.snare[step]);
+    step = (step - 1 + STEPS) % STEPS;
 
-  if (hat[step] && Math.random() < density("hatDensity"))
-    playHat(t, velocity.hat[step]);
-
-  if (bass[step] && Math.random() < density("bassDensity"))
-    playBass(bass[step], t, velocity.bass[step]);
-
-  highlight();
-
-  step = (step + 1) % STEPS;
-
-  timer = setTimeout(loop, stepTime * 1000);
+  }, 120);
 }
 
 function stop() {
-  clearTimeout(timer);
+  clearInterval(interval);
 }
 
-// ---------------- MIXER ----------------
-
-function setMix(id, val) {
-  mix[id] = val / 100;
-}
-
-// ---------------- RANDOM ----------------
-
-function randomize(arr, vel) {
-  for (let i = 0; i < STEPS; i++) {
-    arr[i] = Math.random() > 0.7 ? 1 : 0;
-    vel[i] = Math.random() * 0.7 + 0.3;
-  }
-  createGrid();
-}
-
-function randomBass() {
-  for (let i = 0; i < STEPS; i++) {
-    bass[i] = Math.random() < 0.3
-      ? scale[Math.floor(Math.random() * scale.length)]
-      : null;
-
-    velocity.bass[i] = Math.random() * 0.7 + 0.3;
-  }
-  createBassGrid();
-}
-
-// ---------------- GRID ----------------
+// ---------------- UI ----------------
 
 function createGrid() {
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "";
-
-  for (let i = 0; i < STEPS; i++) {
-    const c = document.createElement("div");
-    c.style.display = "inline-block";
-    c.style.margin = "2px";
-
-    const k = document.createElement("button");
-    const s = document.createElement("button");
-    const h = document.createElement("button");
-
-    k.innerText = kick[i] ? "●" : "○";
-    s.innerText = snare[i] ? "●" : "○";
-    h.innerText = hat[i] ? "●" : "○";
-
-    k.onclick = () => { kick[i] ^= 1; createGrid(); };
-    s.onclick = () => { snare[i] ^= 1; createGrid(); };
-    h.onclick = () => { hat[i] ^= 1; createGrid(); };
-
-    c.appendChild(k);
-    c.appendChild(s);
-    c.appendChild(h);
-
-    grid.appendChild(c);
-  }
+  createLane("kickRow", "kick");
+  createLane("snareRow", "snare");
+  createLane("hatRow", "hat");
+  createLane("bassRow", "bass");
 }
 
-function createBassGrid() {
-  const grid = document.getElementById("bassGrid");
-  grid.innerHTML = "";
+function createLane(id, lane) {
+  const row = document.getElementById(id);
+  row.innerHTML = "";
 
   for (let i = 0; i < STEPS; i++) {
-    const b = document.createElement("button");
+    const cell = document.createElement("div");
+    cell.className = "step";
 
-    b.innerText = bass[i] || ".";
+    if (lanes[lane][i]) cell.classList.add("on");
 
-    b.onclick = () => {
-      bass[i] = bass[i] ? null : "D";
-      createBassGrid();
+    cell.onclick = () => {
+      lanes[lane][i] = lanes[lane][i] ? 0 : (lane === "bass" ? "D" : 1);
+      createGrid();
     };
 
-    grid.appendChild(b);
+    row.appendChild(cell);
   }
 }
 
-// ---------------- VISUAL PLAYHEAD ----------------
+function updateUI(playhead) {
+  document.querySelectorAll(".step").forEach(el => {
+    el.classList.remove("playhead");
+  });
 
-function highlight() {
-  const g = document.getElementById("grid")?.children;
-  const b = document.getElementById("bassGrid")?.children;
+  const rows = ["kickRow", "snareRow", "hatRow", "bassRow"];
 
-  if (g) {
-    for (let i = 0; i < g.length; i++) {
-      g[i].style.opacity = (i === step) ? "1" : "0.35";
+  rows.forEach(id => {
+    const row = document.getElementById(id);
+    if (!row) return;
+
+    const cells = row.children;
+    if (cells[playhead]) {
+      cells[playhead].classList.add("playhead");
     }
-  }
-
-  if (b) {
-    for (let i = 0; i < b.length; i++) {
-      b[i].style.opacity = (i === step) ? "1" : "0.35";
-    }
-  }
+  });
 }
 
-// INIT
-createGrid();
-createBassGrid();
+// init
+window.onload = createGrid;
