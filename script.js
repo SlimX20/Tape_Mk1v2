@@ -119,10 +119,6 @@ function bassSound(note,t){
 
 // ---------------- ENGINE ----------------
 
-function shouldPlay(lane){
-  return Math.random() < density[lane];
-}
-
 function start(){
   if(interval) clearInterval(interval);
 
@@ -135,10 +131,10 @@ function start(){
     const swing = (step%2===1) ? swingValue()*0.05 : 0;
     const t = now + swing;
 
-    if(lanes.kick[step] && shouldPlay("kick")) kickSound(t);
-    if(lanes.snare[step] && shouldPlay("snare")) snareSound(t);
-    if(lanes.hat[step] && shouldPlay("hat")) hatSound(t);
-    if(lanes.bass[step] && shouldPlay("bass")) bassSound(lanes.bass[step],t);
+    if(lanes.kick[step]) kickSound(t);
+    if(lanes.snare[step]) snareSound(t);
+    if(lanes.hat[step]) hatSound(t);
+    if(lanes.bass[step]) bassSound(lanes.bass[step],t);
 
     updateUI(step);
     step = (step+1)%STEPS;
@@ -179,7 +175,10 @@ function makeLane(lane){
 
 function randomLane(lane){
   for(let i=0;i<STEPS;i++){
-    lanes[lane][i]=Math.random()>0.7?(lane==="bass"?"D":1):0;
+    const chance = density[lane];
+    lanes[lane][i] = Math.random() < chance
+      ? (lane==="bass"?"D":1)
+      : 0;
   }
   createGrid();
 }
@@ -193,27 +192,15 @@ function clearLane(lane){
 
 // ---------------- EUCLIDEAN BASS ----------------
 
-function euclid(steps, fills){
-  let pattern = Array(steps).fill(0);
-  let bucket = 0;
-
-  for(let i=0;i<steps;i++){
-    bucket += fills;
-    if(bucket >= steps){
-      bucket -= steps;
-      pattern[i] = 1;
-    }
-  }
-  return pattern;
-}
-
 function generateBass(){
-  const fills = Math.floor(Math.random()*8)+4; // 4–12 hits
-  const pattern = euclid(STEPS,fills);
   const notes = ["D","A","G","C"];
 
   for(let i=0;i<STEPS;i++){
-    lanes.bass[i] = pattern[i] ? notes[Math.floor(Math.random()*notes.length)] : null;
+    if(Math.random() < density.bass){
+      lanes.bass[i] = notes[Math.floor(Math.random()*notes.length)];
+    } else {
+      lanes.bass[i] = null;
+    }
   }
 
   createGrid();
