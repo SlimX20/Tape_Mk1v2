@@ -175,11 +175,19 @@ function makeLane(lane){
 
 function randomLane(lane){
   for(let i=0;i<STEPS;i++){
-    const chance = density[lane];
-    lanes[lane][i] = Math.random() < chance
-      ? (lane==="bass"?"D":1)
+
+    let chance = density[lane];
+
+    // 🎵 GROOVE BIAS
+    if(lane === "kick" && (i % 8 === 0)) chance *= 1.5;
+    if(lane === "snare" && (i % 8 === 4)) chance *= 1.5;
+    if(lane === "hat" && (i % 2 === 0)) chance *= 1.2;
+
+    lanes[lane][i] = Math.random() < Math.min(1, chance)
+      ? (lane==="bass" ? "D" : 1)
       : 0;
   }
+
   createGrid();
 }
 
