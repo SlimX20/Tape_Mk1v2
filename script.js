@@ -125,6 +125,8 @@ function start(){
   audioCtx = new (window.AudioContext||window.webkitAudioContext)();
   step = 0;
 
+  const intervalTime = (60 / bpm()) * 1000 / 4;
+
   interval = setInterval(()=>{
 
     const now = audioCtx.currentTime;
@@ -139,12 +141,19 @@ function start(){
     updateUI(step);
     step = (step+1)%STEPS;
 
-  },120);
+  }, intervalTime);
 }
 
 function stop(){
   clearInterval(interval);
 }
+
+// ---------------- BPM LIVE UPDATE FIX ----------------
+document.getElementById("bpm").oninput = () => {
+  if(interval){
+    start();
+  }
+};
 
 // ---------------- GRID ----------------
 
@@ -178,7 +187,6 @@ function randomLane(lane){
 
     let chance = density[lane];
 
-    // 🎵 GROOVE BIAS
     if(lane === "kick" && (i % 8 === 0)) chance *= 1.5;
     if(lane === "snare" && (i % 8 === 4)) chance *= 1.5;
     if(lane === "hat" && (i % 2 === 0)) chance *= 1.2;
